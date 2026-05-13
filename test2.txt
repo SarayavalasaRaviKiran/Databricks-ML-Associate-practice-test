@@ -1,0 +1,970 @@
+Question 1
+Skipped
+A data analyst runs the following on a 25 GB table:
+
+
+
+DROP TABLE IF EXISTS sales.orders;
+
+
+
+Afterwards, SHOW TABLES no longer lists sales.orders, but the underlying Parquet files in cloud object storage are still present. Which statement best explains this behaviour?
+
+Correct answer
+The table was an external (unmanaged) table, so DROP TABLE removes the metadata while the data files in their original storage location are left untouched.
+
+DROP TABLE always preserves the underlying files unless the CASCADE option is supplied.
+
+Tables larger than 10 GB always retain their underlying files when dropped.
+
+Unity Catalog requires VACUUM to be run before underlying files are deleted from a managed table.
+
+Overall explanation
+For a managed table, DROP TABLE deletes both the metadata and the underlying data files. For an external table the data is stored in a location outside Unity Catalog's managed storage, so DROP TABLE only removes the metadata reference and leaves the data files in place. Size, VACUUM, and CASCADE are not the determining factors here.
+
+Resources
+Domain
+Understanding of Databricks Data Intelligence Platform
+Question 2
+Skipped
+A new business stakeholder asks the analytics team how an AI/BI Genie space differs from an AI/BI Dashboard. Which statement most accurately describes the primary purpose of a Genie space?
+
+Genie spaces replace Databricks SQL Warehouses by hosting their own compute.
+
+Correct answer
+Genie spaces let business users ask questions in natural language and receive SQL backed answers and visualisations over curated Unity Catalog datasets.
+
+Genie spaces orchestrate Lakeflow Jobs that transform raw files into Delta tables.
+
+Genie spaces are static dashboards that refresh on a schedule.
+
+Overall explanation
+An AI/BI Genie space is a conversational analytics surface where stakeholders can ask questions in plain English. Genie translates the question into SQL against a curated set of Unity Catalog tables and views, runs the SQL on a SQL Warehouse, and returns results plus optional charts. It is neither an ETL orchestrator, a compute engine, nor a static dashboard.
+
+Resources
+Domain
+Developing, Sharing, and Maintaining AI/BI Genie spaces
+Question 3
+Skipped
+A data analyst is running a query in the Databricks SQL Editor and receives an unexpected error message. They want help understanding what went wrong without leaving the editor. How can Databricks Assistant (Genie Code) support the analyst in this situation?
+
+Databricks Assistant (Genie Code) requires the analyst to install a separate extension before any debugging support is available.
+
+Databricks Assistant (Genie Code) only writes new SQL queries from natural language and cannot diagnose errors.
+
+Correct answer
+Databricks Assistant (Genie Code) can interpret the error, propose a fix, and offer corrected SQL inline within the SQL Editor.
+
+Databricks Assistant (Genie Code) only works in notebooks and cannot be used inside the SQL Editor.
+
+Overall explanation
+Databricks Assistant is embedded directly in the SQL Editor and notebooks. It can read the failing query, interpret the error message, suggest a corrected version, and let the analyst apply the fix in place. The other options describe limitations that do not exist in the current product.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 4
+Skipped
+A data analyst receives a 30 row mapping file from a colleague as a CSV attachment. The analyst wants to use it as a Unity Catalog table for joins inside the SQL Editor without involving cloud storage credentials or asking a data engineer for help.
+
+Which approach is the fastest and most appropriate?
+
+Correct answer
+Use the Add data interface in Catalog Explorer or Databricks SQL to upload the CSV directly into a managed Unity Catalog table.
+
+Email the CSV to a data engineer, ask them to drop it into S3, then create an external table.
+
+Open Excel, copy the values into a notebook cell, and run an INSERT statement for each row.
+
+Open a support ticket with Databricks and ask them to register the table for you.
+
+Overall explanation
+The Add data interface lets an analyst pick a local file (CSV, TSV, JSON, Avro, Parquet, or text), preview the schema, choose a target catalog and schema, and create a managed Unity Catalog Delta table with no pipeline code or shared credentials. The other options add unnecessary handoffs or are simply impractical for a small lookup file.
+
+Resources
+Domain
+Importing Data
+Question 5
+Skipped
+A data analyst wants to use natural-language search across data assets, receive AI-generated comments on table columns, and get AI-driven query suggestions while exploring data in the workspace.
+
+Which component of the Databricks Data Intelligence Platform is primarily responsible for powering these AI-native capabilities by understanding the semantics of the organisation's data?
+
+Photon
+
+AI/BI Genie
+
+Unity Catalog
+
+Correct answer
+Data Intelligence Engine
+
+Mosaic AI Vector Search
+
+Overall explanation
+The Data Intelligence Engine (DatabricksIQ) is the AI engine that understands the unique semantics of your data and powers natural-language interactions, AI-generated documentation, and intelligent suggestions across the platform. Unity Catalog is the governance layer, AI/BI Genie is a chat interface for business users that sits on top of curated datasets, Mosaic AI Vector Search is for embedding similarity search, and Photon is the vectorised query engine.
+
+Resources
+Domain
+Understanding of Databricks Data Intelligence Platform
+Question 6
+Skipped
+An analyst frequently filters a 5 TB events table on event_date and customer_region, but the team plans to add filters on product_category in the coming months. They want a clustering approach that improves filter performance now and can adapt to new filter columns later without rewriting the entire table.
+
+Which option is most appropriate?
+
+Creating a materialized view with all combinations precomputed
+
+Correct answer
+Liquid Clustering on event_date and customer_region, with the option to evolve cluster keys later
+
+Z ORDER BY event_date and customer_region after every load
+
+Bucketing the table by customer_region
+
+Overall explanation
+Liquid Clustering speeds up filtered reads on the chosen columns and lets you change cluster keys later with a simple ALTER TABLE, without rewriting historical data. Hive partitioning locks in the layout, Z ORDER must be reapplied after every load, bucketing is a legacy approach, and a materialized view does not address ad hoc filtering on a large fact table.
+
+Resources
+Domain
+Analyzing Queries
+Question 7
+Skipped
+A data analyst at a logistics firm runs aggregation heavy SQL queries against a 4 TB Delta table on a Pro SQL Warehouse. The team enables Photon to accelerate workloads. Which TWO statements correctly describe Photon? (Select two)
+
+Correct selection
+Photon is a vectorised query engine written in C++ that accelerates SQL and DataFrame workloads.
+
+Correct selection
+Photon improves performance for scans, filters, joins, aggregations, and writes to Delta tables.
+
+Photon only accelerates Python User Defined Functions executed in notebooks.
+
+Photon is automatically enabled on all SQL Warehouses, with no opt out.
+
+Photon replaces Delta Lake as the default storage format on serverless warehouses.
+
+Overall explanation
+Photon is a native vectorised C++ engine that accelerates SQL and DataFrame operations including scans, filters, joins, aggregations, and writes to Delta. It does not replace Delta storage, is not the only execution path on every SQL Warehouse type, and does not specifically target Python UDFs.
+
+Resources
+Domain
+Analyzing Queries
+Question 8
+Skipped
+A data analyst combines two query results that may share rows: yesterday's orders and today's orders. They want to keep duplicates in the combined output for auditing.
+
+Which set operation should they use?
+
+Correct answer
+UNION ALL
+
+EXCEPT
+
+INTERSECT
+
+UNION
+
+Overall explanation
+UNION ALL stacks both result sets and preserves duplicate rows, which is what the audit trail requires. UNION removes duplicates implicitly and is more expensive. INTERSECT returns only rows present in both sets, and EXCEPT returns rows in the first set that are not in the second.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 9
+Skipped
+An analyst wants to be notified by email when the daily order total drops below 1,000 units. They write a SQL query that returns the total and try to configure an alert.
+
+Which set of choices is correct?
+
+Configure the alert to monitor any row in the result set without specifying a column.
+
+Correct answer
+Pick the column to monitor, set the trigger condition to less than 1000, choose email as the destination, and define a refresh schedule.
+
+Alerts cannot use email destinations.
+
+Alerts run once on creation and do not require a schedule.
+
+Alerts can only be configured against materialized views.
+
+Overall explanation
+A Databricks SQL alert is built on a query, a column to evaluate, a trigger condition, a destination such as email, Slack, or webhook, and a refresh schedule that controls how often the query runs. The other options misstate alert mechanics.
+
+Resources
+Domain
+Creating Dashboards and Visualizations in Databricks
+Question 10
+Skipped
+An analyst is creating a Genie space for the marketing team. They want new viewers landing on the space to immediately see examples of the kinds of questions Genie can answer well. Which configuration step accomplishes this?
+
+Pin the queries as alerts that trigger on each visit.
+
+Add the example queries as bullet points inside a Text widget on a separate AI/BI Dashboard.
+
+Correct answer
+Define a list of sample questions inside the Genie space settings.
+
+Create a separate Genie space per question and link them with shareable URLs.
+
+Overall explanation
+Genie spaces have a dedicated Sample Questions section. Authors curate a short list of in scope prompts which appear on the welcome screen so new users learn the kind of asks the space is built for. The other approaches do not surface example prompts inside the Genie experience.
+
+Resources
+Domain
+Developing, Sharing, and Maintaining AI/BI Genie spaces
+Question 11
+Skipped
+A data analyst runs a SQL query in a Databricks notebook using a %sql cell that returns weekly active user counts. They want to turn the result into a line chart without leaving the notebook.
+
+Which action achieves this?
+
+Wrap the query in a materialized view and chart from a separate notebook.
+
+Correct answer
+Run the query, then click the plus icon in the result cell and add a Visualization, choosing the line chart type.
+
+Convert the notebook into a job and rely on job output for charts.
+
+Move the SQL into an AI/BI Dashboard before any chart can be added.
+
+Save the result as a CSV, open it in Excel, and chart it there.
+
+Overall explanation
+Notebook result cells expose a plus icon that lets you add visualisations such as line, bar, scatter, and pie. The SQL Editor exposes a similar Add Visualization affordance. The other options are unnecessary detours.
+
+Resources
+Domain
+Creating Dashboards and Visualizations in Databricks
+Question 12
+Skipped
+An analyst opens the Query Profile for a slow aggregation query and wants to find out whether a specific operator is exceeding the warehouse memory budget and spilling to disk. Which Query Profile metric directly indicates this?
+
+Correct answer
+Peak memory consumption per operator and bytes spilled to disk
+
+Rows produced
+
+Cluster uptime
+
+Number of files pruned
+
+Overall explanation
+Query Profile reports peak memory per operator alongside spill metrics, so analysts can identify the exact stage exhausting memory. Rows produced shows volume, file pruning relates to scan efficiency, cluster uptime is a compute statistic, and compilation time is plan generation cost.
+
+Resources
+Domain
+Analyzing Queries
+Question 13
+Skipped
+Inside a Unity Catalog metastore, an analyst needs to fully qualify a table named fact_orders that lives in the sales schema of the analytics catalog.
+
+Which name should she use in her SELECT statement?
+
+metastore.analytics.sales.fact_orders
+
+sales.analytics.fact_orders
+
+analytics.fact_orders
+
+Correct answer
+analytics.sales.fact_orders
+
+Overall explanation
+Unity Catalog uses a three-level namespace of catalog.schema.object. The catalog is the top level, the schema (formerly database) sits below, and tables, views, or volumes sit inside the schema. The metastore is implicit and is not part of the qualified name. Two-part names rely on the current catalog context.
+
+Resources
+Domain
+Understanding of Databricks Data Intelligence Platform
+Question 14
+Skipped
+A data analyst needs to return only the user_id and signup_date columns from app_users for users who signed up after 2025-01-01 and live in Germany.
+
+Which query satisfies the requirement?
+
+SELECT * FROM app_users WHERE signup_date > '2025-01-01' AND country = 'Germany';
+
+SELECT signup_date, country FROM app_users WHERE signup_date > '2025-01-01' AND country = 'Germany';
+
+Correct answer
+SELECT user_id, signup_date FROM app_users WHERE signup_date > '2025-01-01' AND country = 'Germany';
+
+SELECT user_id, signup_date FROM app_users WHERE signup_date < '2025-01-01' OR country = 'Germany';
+
+Overall explanation
+The correct solution projects only the requested columns and applies both required predicates with AND. The other options either returns every column, does not project user_id or inverts the date comparison and uses OR, which broadens the result set incorrectly.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 15
+Skipped
+A data analyst needs to join a Unity Catalog Delta table called sales.orders with a customers table that lives in an operational PostgreSQL database. The join must run inside Databricks, respect Unity Catalog permissions, and surface lineage.
+
+Which approach should the analyst choose?
+
+Move the Delta table out of Unity Catalog into PostgreSQL so both tables live in the same engine, then run the join in PostgreSQL.
+
+Export the PostgreSQL table to CSV every morning and reload it as a managed Delta table before joining.
+
+Correct answer
+Use Lakehouse Federation to register a foreign catalog for PostgreSQL, then write a single SQL query that joins the federated table with the Delta table.
+
+Connect to PostgreSQL with a Python JDBC reader, register the result as a temporary view, then join using Databricks SQL.
+
+Overall explanation
+Lakehouse Federation registers external systems such as PostgreSQL as foreign catalogs in Unity Catalog. The analyst can then join the foreign table with the Delta table in a single SQL statement, with permissions and lineage governed by Unity Catalog and no copy required. JDBC reads in Python and CSV exports skip Unity Catalog governance, and moving Delta data out is unnecessary.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 16
+Skipped
+A table prod.hr.employees contains the columns employee_id, full_name, email, ssn, and salary. Marketing analysts need to query employees for headcount reports but must not see the ssn column or the full email address.
+
+Which approach is the recommended way to expose this table safely to the marketing group?
+
+Drop the ssn and email columns from the base table to remove the PII permanently.
+
+Correct answer
+Create a view that excludes ssn and applies a masking expression to email, then grant SELECT only on the view to the marketing group.
+
+Grant the marketing group SELECT on the base table directly so they can choose which columns to query.
+
+Export the table to CSV and email the file to the marketing group on request.
+
+Overall explanation
+Creating a view that excludes or masks PII columns and granting SELECT only on the view is the standard Unity Catalog pattern for fine grained access. Granting SELECT on the base table exposes all columns including ssn. Exporting to CSV bypasses governance and creates an uncontrolled copy. Dropping columns from the base table destroys data that other authorized teams may legitimately need.
+
+Resources
+Domain
+Securing Data
+Question 17
+Skipped
+A Genie space owner wants product managers to be able to ask questions and view results, but not modify the dataset list, instructions, or Trusted Assets. Which permission level should the owner grant?
+
+CAN MANAGE
+
+NO PERMISSIONS
+
+CAN EDIT
+
+Correct answer
+CAN RUN
+
+Overall explanation
+CAN RUN lets users send prompts and view results without granting any authoring rights. CAN MANAGE and CAN EDIT both let the grantee modify the space's configuration. NO PERMISSIONS would block access entirely.
+
+Resources
+Domain
+Developing, Sharing, and Maintaining AI/BI Genie spaces
+Question 18
+Skipped
+Leadership wants a single chart that compares monthly revenue trends for three product categories over the past two years and highlights seasonal patterns.
+
+Which visualisation type best communicates this?
+
+Geo map of revenue by country
+
+Pie chart of category share for the last month
+
+Scatter chart of revenue against profit margin
+
+Single value counter showing total revenue
+
+Correct answer
+Multi series line chart with month on the x axis and revenue on the y axis, one line per category
+
+Overall explanation
+Multi series line charts are designed to compare trends across categories along a continuous time axis, making seasonal swings and divergent growth obvious. Pie charts capture share at one point, counters lose detail, scatter charts compare two measures, and geo maps map geography rather than time.
+
+Resources
+Domain
+Creating Dashboards and Visualizations in Databricks
+Question 19
+Skipped
+A data analyst wants to register an external table that points to existing Parquet files in cloud object storage so the table is governed by Unity Catalog without copying the data.
+
+Which clause is required at table creation time?
+
+FROM 's3://bucket/data/'
+
+SOURCE 's3://bucket/data/'
+
+PATH 's3://bucket/data/'
+
+Correct answer
+LOCATION 's3://bucket/data/'
+
+Overall explanation
+External tables are declared using the LOCATION clause to point at an external storage path that Databricks does not own. The other keywords are not valid syntax for declaring an external table location in Databricks SQL.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 20
+Skipped
+A data steward on the analytics platform team has marked dozens of tables across the corp_data catalog as certified using the system.certification_status = certified tag.
+
+A new analyst joins the team and wants to see only those certified tables in Catalog Explorer.
+
+Which approach lets the analyst filter the catalog view to certified tables?
+
+Click each table individually and inspect the Tags tab.
+
+Run OPTIMIZE corp_data ZORDER BY (certification) to surface certified tables.
+
+Add a WHERE clause to system.information_schema.tables filtering on certified = TRUE.
+
+Correct answer
+Type tag:system.certification_status=certified into the Catalog Explorer search box.
+
+Overall explanation
+Catalog Explorer's search supports tag filters in the form tag:key=value and returns only objects carrying that tag. OPTIMIZE rewrites file layout and is unrelated to discovery. The information_schema does not expose a certified boolean column. Manually inspecting each table is impractical and is not how Unity Catalog surfaces certified assets.
+
+Resources
+Domain
+Managing Data
+Question 21
+Skipped
+A finance analyst needs to audit who modified the silver_invoices Delta table and what operations were performed over the last seven days.
+
+Which command should they run?
+
+B. DESCRIBE EXTENDED silver_invoices;
+
+Correct answer
+DESCRIBE HISTORY silver_invoices;
+
+SELECT * FROM silver_invoices VERSION AS OF 7;
+
+SHOW TBLPROPERTIES silver_invoices;
+
+Overall explanation
+DESCRIBE HISTORY returns the operation, user, timestamp, version, and parameters for every Delta transaction, which is exactly what auditing requires. VERSION AS OF queries a specific snapshot rather than listing changes, DESCRIBE EXTENDED returns metadata, SHOW TBLPROPERTIES lists table properties, and AUDIT TABLE is not a Databricks command.
+
+Resources
+Domain
+Analyzing Queries
+Question 22
+Skipped
+An analyst wants to read the Delta table sales.orders as it existed at version 12 to compare an older report to the current state.
+
+Which query is correct?
+
+Correct answer
+SELECT * FROM sales.orders VERSION AS OF 12;
+
+SELECT * FROM sales.orders AT VERSION = 12;
+
+SELECT * FROM sales.orders AS OF VERSION 12;
+
+SELECT * FROM sales.orders WITH VERSION = 12;
+
+Overall explanation
+Delta Lake supports time travel by version using the syntax VERSION AS OF <version>. The other forms are not valid Databricks SQL. The corresponding option for time travel by timestamp is TIMESTAMP AS OF '...'. Time travel only works while the historical files are still retained.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 23
+Skipped
+A Genie space owner reviews the monitoring panel after a month in production and notices that a third of recent questions received downvotes from users.
+
+Which action best reflects the recommended optimisation workflow for a Genie space?
+
+Correct answer
+Read the downvoted questions, identify gaps, then update domain instructions, refine the dataset list, and add Trusted Assets for missing patterns.
+
+Delete every downvoted question from history so it does not skew metrics.
+
+Remove the SQL Warehouse and reattach a smaller one.
+
+Set the space to read only and ask users to log questions in a spreadsheet instead.
+
+Overall explanation
+The recommended loop is: track real user questions and feedback, identify common failure modes, then improve the space by tightening instructions, curating better datasets, and vetting reusable SQL as Trusted Assets. The other answers either hide signal or remove access without addressing accuracy.
+
+Resources
+Domain
+Developing, Sharing, and Maintaining AI/BI Genie spaces
+Question 24
+Skipped
+An analytics team at a retail company is designing a model in Unity Catalog to support fast aggregations such as total sales by product, by region, and by month. They want a denormalized design with a single large fact table joined to a small number of dimension tables for products, stores, customers, and dates.
+
+Which industry standard schema design best matches this goal?
+
+Snowflake schema, because dimensions are normalized into many related tables to save storage.
+
+Correct answer
+Star schema, because a central fact table is surrounded by denormalized dimension tables that simplify joins for BI workloads.
+
+Third normal form (3NF), because OLTP normalization is the recommended pattern for analytics in Databricks.
+
+Data vault, because hubs, links, and satellites give the fastest aggregate query performance.
+
+Overall explanation
+A star schema places a central fact table at the centre with denormalized dimension tables radiating outward. This minimises the number of joins and is ideal for BI aggregations on Databricks SQL. A snowflake schema normalizes dimensions into multiple related tables, which adds joins. Data vault is built for auditability and source agnostic loading, not raw aggregate speed. 3NF is an OLTP pattern, not an analytics pattern.
+
+Resources
+Domain
+Data Modeling with Databricks SQL
+Question 25
+Skipped
+A data analyst is preparing a star schema for a sales dashboard and needs to decide which Medallion layer the curated, business ready fact and dimension tables should live in.
+
+Which layer is the recommended home for the analyst facing star schema in the Medallion Architecture?
+
+Bronze, because raw ingested data is the right starting point for BI dashboards.
+
+Correct answer
+Gold, because business level aggregates and dimensional models that power analytics live here.
+
+Silver, because cleaned and conformed data is the final stage before reporting.
+
+Platinum, the additional fourth Medallion layer reserved for star schemas.
+
+Overall explanation
+The gold layer holds the project specific, business level data that consumers query directly. Dimensional models such as star schemas, business aggregates, and curated marts belong here. Bronze stores raw ingested data, silver stores cleaned and conformed data, and there is no platinum layer in the Medallion Architecture.
+
+Resources
+Domain
+Data Modeling with Databricks SQL
+Question 26
+Skipped
+What is the main purpose of a Databricks SQL Warehouse?
+
+Correct answer
+It is a SQL specific compute resource powered by the Photon engine and tuned for low latency BI and analytics queries.
+
+It is a general purpose compute resource that runs Python, Scala, R, and SQL workloads side by side.
+
+It is a Delta Sharing endpoint that lets external partners run SQL against the lakehouse without authentication.
+
+It is a storage layer that materialises Delta tables on warehouse local disk to speed up future reads.
+
+Overall explanation
+A SQL Warehouse is dedicated SQL compute that runs Photon, an optimised vectorised execution engine for analytics and BI. All purpose clusters can run multiple languages but are not the SQL specific BI compute target. SQL Warehouses are not storage and not Delta Sharing endpoints.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 27
+Skipped
+An analyst supports a daily revenue dashboard that aggregates a very large transactions table. Source data lands once per day, but the dashboard is opened many times during the day. They want fast loads while keeping cost low.
+
+Which object should the analyst create?
+
+A streaming table that ingests transactions in real time.
+
+A temporary view that the dashboard recreates every time it opens.
+
+A standard view that recomputes the aggregation on every dashboard load.
+
+Correct answer
+A materialized view that precomputes the daily aggregation and refreshes after the daily load.
+
+Overall explanation
+Materialized views store precomputed query results and refresh on a schedule, which fits a workload where the source changes once a day but the report is read many times. Standard and temporary views recompute on each read. Streaming tables are intended for continuously arriving data, not daily batch refreshes.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 28
+Skipped
+A retailer drops new transaction JSON files into an S3 bucket every few minutes throughout the day. A data analyst needs to bring these files into a Unity Catalog table efficiently, picking up new files as they arrive, supporting schema drift, and avoiding manual reprocessing of files that have already been loaded.
+
+Which Databricks ingestion feature best fits the requirement?
+
+A Marketplace listing that lists every JSON file as a separate dataset.
+
+Correct answer
+Auto Loader, which detects new files on cloud object storage and incrementally ingests them with optional schema inference and evolution.
+
+A scheduled SQL Editor query that uses SELECT * from each file path with manual file tracking.
+
+Delta Sharing, which exposes a recipient share to the S3 bucket.
+
+Overall explanation
+Auto Loader (cloudFiles) is purpose built for incremental ingestion from cloud object storage. It tracks processed files automatically, supports schema evolution, and scales to high file volumes. SQL Editor queries do not track file state. Delta Sharing distributes Delta tables, not raw files. Marketplace is a discovery surface, not an ingestion mechanism.
+
+Resources
+Domain
+Importing Data
+Question 29
+Skipped
+A transactions table in Unity Catalog contains a units_sold column that occasionally records the value -99 to flag a data entry error.
+
+The analyst needs a view called valid_transactions that excludes those rows but keeps every other column.
+
+Which SQL statement creates the view correctly?
+
+Correct answer
+CREATE VIEW valid_transactions AS SELECT * FROM transactions WHERE units_sold <> -99;
+
+CREATE VIEW valid_transactions AS SELECT * FROM transactions WHERE units_sold IS NULL;
+
+CREATE VIEW valid_transactions AS SELECT * FROM transactions WHERE ABS(units_sold) <> 99;
+
+CREATE VIEW valid_transactions AS SELECT * FROM transactions HAVING units_sold <> -99;
+
+Overall explanation
+WHERE filters rows before grouping, which is the correct clause for excluding sentinel values. HAVING is only valid alongside aggregation. Filtering on IS NULL would exclude the wrong set. The ABS expression also excludes the legitimate value 99 alongside -99, which is not what the question asks for.
+
+Resources
+Domain
+Managing Data
+Question 30
+Skipped
+An analyst needs to share an AI/BI Dashboard with three external partners who do not have Databricks accounts. The partners must be able to view the dashboard in a browser without being added to the workspace.
+
+Which approach is correct?
+
+Correct answer
+Publish the dashboard with embedded credentials and share the public link with the partners.
+
+Send screenshots over email each morning.
+
+Add the partners as workspace admins and grant CAN MANAGE on the dashboard.
+
+Make the partners account level users and assign CAN EDIT to the dashboard.
+
+Email the partners a Personal Access Token with workspace level scopes.
+
+Overall explanation
+AI/BI Dashboards support publishing with embedded credentials so a shareable link lets viewers see the dashboard without workspace access. Granting admin or edit privileges to outsiders violates least privilege, sharing tokens is unsafe, and emailing screenshots loses interactivity.
+
+Resources
+Domain
+Creating Dashboards and Visualizations in Databricks
+Question 31
+Skipped
+Before deprecating a Unity Catalog table named legacy_orders, an analyst needs to identify every downstream notebook, query, dashboard, and job that consumes it so they can warn the owners.
+
+Which Catalog Explorer feature provides this view?
+
+Correct answer
+The Lineage tab on the table's detail page
+
+The Permissions tab
+
+The History tab
+
+The Sample Data tab
+
+Overall explanation
+The Lineage tab in Catalog Explorer surfaces both upstream sources and downstream consumers, including notebooks, queries, dashboards, and jobs that reference the table. History shows Delta time travel snapshots. Sample Data displays rows. Permissions list grants but not consuming workloads.
+
+Resources
+Domain
+Managing Data
+Question 32
+Skipped
+Which statement best describes the role of the table owner in Unity Catalog from a security best practices perspective?
+
+Correct answer
+The owner can grant and revoke privileges and modify the table; ownership should typically be assigned to a group rather than an individual user.
+
+Ownership has no effect on privileges; all access in Unity Catalog is controlled exclusively by GRANTs.
+
+Owners can read but cannot grant access to other users.
+
+Only the workspace admin can ever own a table, and ownership cannot be transferred.
+
+Overall explanation
+The owner of a Unity Catalog object can grant and revoke privileges, alter the object, and drop it. Best practice is to assign ownership to a group rather than an individual user, so that ownership does not break when one person leaves the team. Workspace admins are not the only valid owners, owners do have grant authority, and ownership absolutely affects privileges.
+
+Resources
+Domain
+Securing Data
+Question 33
+Skipped
+A data analyst is building an AI/BI Dashboard that needs three tabs labelled Development, Testing, and Production, each showing different visualisations. They also want a clear text label at the top of each tab explaining what users are looking at. Which approach in the AI/BI Dashboard editor satisfies both requirements?
+
+Create three separate dashboards and link them with hyperlinks in a fourth dashboard.
+
+Correct answer
+Add three pages to the dashboard and place a Text widget at the top of each page describing the section.
+
+Place all visualisations on a single page and use comments in the SQL queries as labels.
+
+Use the SQL Editor to add a header row to each query.
+
+Use the Markdown column inside each query result to show the labels.
+
+Overall explanation
+AI/BI Dashboards support multiple pages, and the Text widget lets you add formatted titles and descriptions at any location on the canvas. Splitting into separate dashboards loses the unified experience, while query comments and result columns are not visible to dashboard viewers.
+
+Resources
+Domain
+Creating Dashboards and Visualizations in Databricks
+Question 34
+Skipped
+An analyst is preparing the orders table for use inside an AI/BI Genie space. The column names are abbreviated (for example, cust_lt_val) and Genie sometimes misinterprets them.
+
+Which Unity Catalog action best improves Genie's understanding of these columns?
+
+Drop the column and recreate it with a longer name.
+
+Correct answer
+Add a description to each column using ALTER TABLE orders ALTER COLUMN cust_lt_val COMMENT 'Customer lifetime value in USD'.
+
+Encrypt the column so Genie cannot see ambiguous values.
+
+Move the table to a new schema named genie_ready.
+
+Overall explanation
+Column descriptions in Unity Catalog are surfaced to Genie as semantic context, helping the model translate natural language questions into accurate SQL. They can be added with ALTER TABLE ... ALTER COLUMN ... COMMENT '...' or edited directly in Catalog Explorer. Renaming, encryption, or moving the table does not provide Genie with additional context about the column's meaning.
+
+Resources
+Domain
+Managing Data
+Question 35
+Skipped
+An analyst has a SQL query with a parameter for region. They add an area chart based on this query to an AI/BI Dashboard, and they configure the parameter as a Dashboard parameter.
+
+What is the effect on the dashboard?
+
+The parameter value is hard coded at the moment the chart is added and cannot change later.
+
+Correct answer
+The area chart uses whatever value is selected in the dashboard parameter, and any other visualisation that references the same parameter is filtered consistently.
+
+The chart is converted into a parameter widget itself.
+
+The dashboard parameter only affects schedules, not visualisations.
+
+The area chart is filtered while the rest of the visualisations remain unfiltered.
+
+Overall explanation
+A dashboard parameter is a single input that drives every visualisation referencing the same parameter, so changing it filters all of them consistently. The other options either misstate the scope or claim the value is frozen, neither of which is correct.
+
+Resources
+Domain
+Creating Dashboards and Visualizations in Databricks
+Question 36
+Skipped
+A data team needs to build production-grade transformation pipelines that are defined declaratively, automatically enforce data quality expectations, and recover gracefully from failures with minimal manual intervention.
+
+Which component of the Databricks Data Intelligence Platform best fits this requirement?
+
+Correct answer
+Lakeflow Spark Declarative Pipelines
+
+Databricks SQL
+
+Lakeflow Connect
+
+Mosaic AI
+
+Lakeflow Jobs
+
+Overall explanation
+Lakeflow Spark Declarative Pipelines (the new name for Delta Live Tables) is the declarative ETL framework on Databricks. Pipelines are defined as a series of transformations, expectations enforce quality at runtime, and the engine handles dependency resolution and failure recovery.
+
+Lakeflow Connect is for managed ingestion connectors, Lakeflow Jobs is for orchestration, Mosaic AI covers AI/ML workloads, and Databricks SQL is the SQL workspace for analysts.
+
+Resources
+Domain
+Understanding of Databricks Data Intelligence Platform
+Question 37
+Skipped
+An analyst owns a sales dashboard and wants the data to refresh automatically every morning at 7am so area managers see fresh numbers when they log in.
+
+Which approach should they use?
+
+Ask each user to manually press refresh when they open the dashboard.
+
+Export the dashboard to PDF the night before so users open the PDF.
+
+Disable caching so the dashboard reruns on every page load.
+
+Correct answer
+Configure a scheduled refresh on the dashboard with a daily 7am cadence.
+
+Use a browser plugin that reloads the tab every hour.
+
+Overall explanation
+AI/BI Dashboards expose a built in scheduled refresh that reruns the underlying queries on a defined cadence and can email subscribers a snapshot. Browser hacks, manual refresh, and PDF exports are not automated solutions, and disabling caching does not refresh data.
+
+Resources
+Domain
+Creating Dashboards and Visualizations in Databricks
+Question 38
+Skipped
+An analyst publishes a daily report and is surprised that the result cache never produces a hit even when the underlying data has not changed. They review the query and find a single SELECT statement using CURRENT_TIMESTAMP() in a derived column.
+
+Why does this prevent the result cache from being used?
+
+Result cache only works with materialized views.
+
+Result cache requires Liquid Clustering on every referenced table.
+
+Correct answer
+Non deterministic functions such as CURRENT_TIMESTAMP, NOW, and RAND disqualify a query from result caching.
+
+Result cache is disabled by default on Pro SQL Warehouses.
+
+Overall explanation
+The Databricks SQL result cache requires deterministic results. CURRENT_TIMESTAMP, NOW, and RAND change every execution so the engine cannot safely return a cached result. The other options describe limits that do not exist in the documented caching behaviour.
+
+Resources
+Domain
+Analyzing Queries
+Question 39
+Skipped
+An analyst writes the following query but it returns an error. They want to keep only product categories where the average price is above 50.
+
+
+
+SELECT category, AVG(price) AS avg_price 
+FROM products 
+WHERE AVG(price) > 50 
+GROUP BY category; 
+
+
+How should the query be rewritten?
+
+Correct answer
+Replace WHERE with HAVING and reference avg_price after GROUP BY.
+
+Add ORDER BY AVG(price) at the end of the query.
+
+Wrap the query in a CTE and filter on AVG(price) outside.
+
+Move AVG(price) > 50 inside the SELECT clause.
+
+Overall explanation
+WHERE filters rows before aggregation and cannot reference aggregate functions. HAVING applies after GROUP BY and is the correct place to filter on AVG(price). Moving AVG into SELECT does not filter, ORDER BY only sorts, a CTE wrapper works but is unnecessary, and APPROX_COUNT_DISTINCT is unrelated to this requirement.
+
+Resources
+Domain
+Analyzing Queries
+Question 40
+Skipped
+When stakeholders ask the finance Genie space about revenue, the generated SQL keeps reading from a stale staging table instead of the certified gold table fct_revenue.
+
+Which action by the analyst will most reliably steer Genie to the correct source?
+
+Lower the warehouse size so the staging query is too slow to run.
+
+Configure an alert on the staging table to detect access.
+
+Ask each user to phrase questions with the words "gold table only".
+
+Correct answer
+Remove the staging table from the dataset list and curate fct_revenue, then save a vetted revenue query as a Trusted Asset.
+
+Overall explanation
+Genie answers questions by reasoning over the curated dataset list and any Trusted Assets attached to the space. Removing the wrong table from the dataset list and saving a vetted SQL query for revenue as a Trusted Asset gives Genie a clear, preferred source. Warehouse size, user phrasing tricks, and alerts do not change which tables Genie considers.
+
+Resources
+Domain
+Developing, Sharing, and Maintaining AI/BI Genie spaces
+Question 41
+Skipped
+An analyst wants to enrich her organisation's reporting with weather and macroeconomic datasets supplied by a third-party provider. The workspace is governed by Unity Catalog and the team wants live, governed access to those datasets without writing ETL or copying files.
+
+Which Databricks feature is purpose-built for this scenario?
+
+Use Auto Loader to continuously copy provider files into a managed table.
+
+Correct answer
+Subscribe to the datasets in Databricks Marketplace, which delivers live, governed access through Delta Sharing without data replication.
+
+Configure a Lakeflow Connect pipeline that pulls data nightly from the provider's REST API.
+
+Use Partner Connect to install the provider's BI tool inside the workspace.
+
+Overall explanation
+Databricks Marketplace is an open marketplace of data products (datasets, notebooks, models, dashboards) delivered using Delta Sharing. Subscribing to a listing gives you live, in-place access to the provider's data through Unity Catalog, with no replication or ETL needed. Auto Loader and Lakeflow Connect are ingestion features that copy data, and Partner Connect is for connecting third-party tools, not for consuming data products.
+
+Resources
+Domain
+Understanding of Databricks Data Intelligence Platform
+Question 42
+Skipped
+A data analyst needs to allow members of the analytics_readers group to query the table prod.sales.orders in Unity Catalog. The analyst already has sufficient privileges to grant access.
+
+Which SQL statement correctly grants only read access on this table?
+
+GRANT READ ON TABLE prod.sales.orders TO analytics_readers;
+
+GRANT ALL PRIVILEGES ON TABLE prod.sales.orders TO analytics_readers;
+
+ALTER TABLE prod.sales.orders ADD READER analytics_readers;
+
+Correct answer
+GRANT SELECT ON TABLE prod.sales.orders TO analytics_readers;
+
+Overall explanation
+Unity Catalog uses the SELECT privilege for read access. GRANT SELECT ON TABLE catalog.schema.table TO group is the correct ANSI SQL syntax for granting query access. READ is not a Unity Catalog privilege, ALL PRIVILEGES gives far more than read, and ALTER TABLE ADD READER is not valid syntax.
+
+Resources
+Domain
+Securing Data
+Question 43
+Skipped
+A data analyst wants to monitor unique daily visitors across a very large web events table. Exact counts are not required; an estimate within a few percent is acceptable, and query latency must stay low.
+
+Which function best fits this requirement?
+
+COUNT(DISTINCT visitor_id) because it always returns the exact result with the lowest cost.
+
+Correct answer
+APPROX_COUNT_DISTINCT(visitor_id) because it uses HyperLogLog++ to return a fast approximate count with configurable error.
+
+COUNT(visitor_id) because distinct counts are returned automatically when the column is indexed.
+
+SUM(DISTINCT visitor_id) because it deduplicates while remaining cheap to compute.
+
+Overall explanation
+APPROX_COUNT_DISTINCT uses the HyperLogLog++ sketch algorithm to estimate cardinality with configurable relative error, typically around 5 percent by default. It is much faster and uses far less memory than an exact COUNT DISTINCT on very large tables. COUNT and SUM(DISTINCT) do not return the requested distinct visitor count.
+
+Resources
+Domain
+Executing queries using Databricks SQL and Databricks SQL
+Question 44
+Skipped
+An analyst notices a sales dashboard takes 90 seconds to load while it used to complete in under 15 seconds. They want to identify which underlying queries have regressed without leaving the SQL Warehouse monitoring surface.
+
+Which Databricks feature is best suited to surface this information at a warehouse level?
+
+Audit logs in System Tables
+
+Spark UI executor logs
+
+Catalog Explorer Lineage tab
+
+Cluster event logs
+
+Correct answer
+Query Insights on the SQL Warehouse monitoring page
+
+Overall explanation
+Query Insights on the SQL Warehouse monitoring page summarises slow and frequently run queries, queue time, and execution time so analysts can spot regressions quickly. Lineage shows data dependencies, Spark UI is a developer tool, cluster event logs concern compute lifecycle, and audit logs track governance events.
+
+Resources
+Domain
+Analyzing Queries
+Question 45
+Skipped
+An analyst sees the table reference finance.reporting.revenue in a query in the Databricks SQL editor.
+
+Which statement correctly describes the parts of this three level identifier in Unity Catalog?
+
+Correct answer
+finance is the catalog, reporting is the schema (database), revenue is the table or view.
+
+finance is the volume, reporting is the schema, revenue is the catalog.
+
+finance is the workspace, reporting is the schema, revenue is the table.
+
+finance is the schema, reporting is the table, revenue is a column.
+
+Overall explanation
+Unity Catalog uses a three level namespace: catalog.schema.object. The first part is the catalog (the top container), the second is the schema (also called database) which groups related objects, and the third is the object itself (table, view, or volume). Workspaces are not part of the three level namespace.
+
+Resources
+Domain
+Securing Data
